@@ -1,0 +1,4 @@
+name: Kingdoms
+version: 0.1.0
+main: dev.kingdoms.KingdomsPlugin
+api-version: '26.1'
