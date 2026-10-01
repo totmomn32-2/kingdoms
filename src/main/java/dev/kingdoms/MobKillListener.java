@@ -1,6 +1,7 @@
 package dev.kingdoms;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -27,7 +28,22 @@ public class MobKillListener implements Listener {
         Kingdom kingdom = manager.getKingdomData(killer.getUniqueId());
         if (kingdom == null) return;
 
-        kingdom.addPoints(1);
-        killer.sendActionBar(Component.text("+1 Kingdom Point"));
+        long kills = kingdom.getMonsterKills() + 1;
+
+        if (kills >= Kingdom.MONSTER_QUEST_GOAL) {
+            kingdom.setMonsterKills(0);
+            kingdom.addPoints(50);
+            kingdom.addCoins(25);
+            manager.saveKingdoms();
+
+            for (Player online : Bukkit.getOnlinePlayers()) {
+                if (manager.getKingdom(online.getUniqueId()) == kingdom.getType()) {
+                    online.sendMessage(Component.text("Quest complete: Monster Hunters! +50 Points, +25 Coins"));
+                }
+            }
+        } else {
+            kingdom.setMonsterKills(kills);
+            killer.sendActionBar(Component.text("Monster Hunters: " + kills + "/" + Kingdom.MONSTER_QUEST_GOAL));
+        }
     }
-}
+                }
