@@ -1,7 +1,5 @@
 package dev.kingdoms;
 
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -9,12 +7,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
+import java.util.Locale;
+
 public class MobKillListener implements Listener {
 
-    private final KingdomManager manager;
+    private final QuestManager quests;
 
-    public MobKillListener(KingdomManager manager) {
-        this.manager = manager;
+    public MobKillListener(QuestManager quests) {
+        this.quests = quests;
     }
 
     @EventHandler
@@ -25,25 +25,7 @@ public class MobKillListener implements Listener {
         Player killer = dead.getKiller();
         if (killer == null) return;
 
-        Kingdom kingdom = manager.getKingdomData(killer.getUniqueId());
-        if (kingdom == null) return;
-
-        long kills = kingdom.getMonsterKills() + 1;
-
-        if (kills >= Kingdom.MONSTER_QUEST_GOAL) {
-            kingdom.setMonsterKills(0);
-            kingdom.addPoints(50);
-            kingdom.addCoins(25);
-            manager.saveKingdoms();
-
-            for (Player online : Bukkit.getOnlinePlayers()) {
-                if (manager.getKingdom(online.getUniqueId()) == kingdom.getType()) {
-                    online.sendMessage(Component.text("Quest complete: Monster Hunters! +50 Points, +25 Coins"));
-                }
-            }
-        } else {
-            kingdom.setMonsterKills(kills);
-            killer.sendActionBar(Component.text("Monster Hunters: " + kills + "/" + Kingdom.MONSTER_QUEST_GOAL));
-        }
+        String mobName = dead.getType().getKey().getKey().toUpperCase(Locale.ROOT);
+        quests.addProgress(killer, QuestType.KILL_MOB, "ANY_HOSTILE", mobName);
     }
-                }
+}
