@@ -6,6 +6,7 @@ public class KingdomsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        getCommand("kingdom").setExecutor(new KingdomCommand());
         getLogger().info("Kingdoms plugin is ON!");
     }
 
