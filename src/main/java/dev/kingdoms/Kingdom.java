@@ -43,4 +43,11 @@ public class Kingdom {
     public void addCore(long amount) {
         core += amount;
     }
+
+    public void restore(int level, long points, long coins, long core) {
+        this.level = level;
+        this.points = points;
+        this.coins = coins;
+        this.core = core;
+    }
 }
