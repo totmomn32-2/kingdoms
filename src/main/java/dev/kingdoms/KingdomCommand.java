@@ -46,15 +46,37 @@ public class KingdomCommand implements CommandExecutor {
         }
 
         if (args[0].equalsIgnoreCase("info")) {
-            KingdomType type = manager.getKingdom(player.getUniqueId());
-            if (type == null) {
+            Kingdom kingdom = manager.getKingdomData(player.getUniqueId());
+            if (kingdom == null) {
                 player.sendMessage(Component.text("You are not in a kingdom yet. Use /kingdom join <red|blue|green>"));
             } else {
-                player.sendMessage(Component.text("Your kingdom: " + type.getDisplayName()));
+                player.sendMessage(Component.text("=== " + kingdom.getType().getDisplayName() + " ==="));
+                player.sendMessage(Component.text("Level: " + kingdom.getLevel()));
+                player.sendMessage(Component.text("Points: " + kingdom.getPoints()));
+                player.sendMessage(Component.text("Coins: " + kingdom.getCoins()));
+                player.sendMessage(Component.text("Core: " + kingdom.getCore()));
+                player.sendMessage(Component.text("Members: " + manager.getMemberCount(kingdom.getType())));
             }
+            return true;
+        }
+
+        // TEMPORARY command for testing, we will remove it later.
+        if (args[0].equalsIgnoreCase("test")) {
+            if (!player.isOp()) {
+                player.sendMessage(Component.text("Only operators can use this."));
+                return true;
+            }
+            Kingdom kingdom = manager.getKingdomData(player.getUniqueId());
+            if (kingdom == null) {
+                player.sendMessage(Component.text("Join a kingdom first."));
+                return true;
+            }
+            kingdom.addPoints(100);
+            kingdom.addCoins(50);
+            player.sendMessage(Component.text("Added 100 points and 50 coins."));
             return true;
         }
 
         return true;
     }
-                                                  }
+}
