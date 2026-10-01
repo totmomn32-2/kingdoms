@@ -10,10 +10,12 @@ public class KingdomCommand implements CommandExecutor {
 
     private final KingdomManager manager;
     private final KingdomMenu menu;
+    private final QuestMenu questMenu;
 
-    public KingdomCommand(KingdomManager manager, KingdomMenu menu) {
+    public KingdomCommand(KingdomManager manager, KingdomMenu menu, QuestMenu questMenu) {
         this.manager = manager;
         this.menu = menu;
+        this.questMenu = questMenu;
     }
 
     @Override
@@ -59,6 +61,11 @@ public class KingdomCommand implements CommandExecutor {
                 player.sendMessage(Component.text("Core: " + kingdom.getCore()));
                 player.sendMessage(Component.text("Members: " + manager.getMemberCount(kingdom.getType())));
             }
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("quests")) {
+            questMenu.open(player);
             return true;
         }
 
