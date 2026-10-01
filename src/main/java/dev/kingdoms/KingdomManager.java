@@ -13,15 +13,18 @@ public class KingdomManager {
 
     private final Map<UUID, KingdomType> members = new HashMap<>();
     private final Map<KingdomType, Kingdom> kingdoms = new EnumMap<>(KingdomType.class);
-    private final File file;
+    private final File membersFile;
+    private final File kingdomsFile;
 
     public KingdomManager(File dataFolder) {
         dataFolder.mkdirs();
-        this.file = new File(dataFolder, "members.yml");
+        this.membersFile = new File(dataFolder, "members.yml");
+        this.kingdomsFile = new File(dataFolder, "kingdoms.yml");
         for (KingdomType type : KingdomType.values()) {
             kingdoms.put(type, new Kingdom(type));
         }
-        load();
+        loadMembers();
+        loadKingdoms();
     }
 
     public boolean isMember(UUID player) {
@@ -48,12 +51,12 @@ public class KingdomManager {
 
     public void join(UUID player, KingdomType kingdom) {
         members.put(player, kingdom);
-        save();
+        saveMembers();
     }
 
-    private void load() {
-        if (!file.exists()) return;
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+    private void loadMembers() {
+        if (!membersFile.exists()) return;
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(membersFile);
         for (String key : yaml.getKeys(false)) {
             KingdomType type = KingdomType.fromString(yaml.getString(key));
             if (type != null) {
@@ -62,13 +65,43 @@ public class KingdomManager {
         }
     }
 
-    private void save() {
+    private void saveMembers() {
         YamlConfiguration yaml = new YamlConfiguration();
         for (Map.Entry<UUID, KingdomType> entry : members.entrySet()) {
             yaml.set(entry.getKey().toString(), entry.getValue().name());
         }
         try {
-            yaml.save(file);
+            yaml.save(membersFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadKingdoms() {
+        if (!kingdomsFile.exists()) return;
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(kingdomsFile);
+        for (Kingdom kingdom : kingdoms.values()) {
+            String path = kingdom.getType().name();
+            kingdom.restore(
+                    yaml.getInt(path + ".level", 1),
+                    yaml.getLong(path + ".points", 0),
+                    yaml.getLong(path + ".coins", 0),
+                    yaml.getLong(path + ".core", 0)
+            );
+        }
+    }
+
+    public void saveKingdoms() {
+        YamlConfiguration yaml = new YamlConfiguration();
+        for (Kingdom kingdom : kingdoms.values()) {
+            String path = kingdom.getType().name();
+            yaml.set(path + ".level", kingdom.getLevel());
+            yaml.set(path + ".points", kingdom.getPoints());
+            yaml.set(path + ".coins", kingdom.getCoins());
+            yaml.set(path + ".core", kingdom.getCore());
+        }
+        try {
+            yaml.save(kingdomsFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
