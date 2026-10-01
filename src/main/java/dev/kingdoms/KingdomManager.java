@@ -1,5 +1,6 @@
 package dev.kingdoms;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -88,7 +89,12 @@ public class KingdomManager {
                     yaml.getLong(path + ".coins", 0),
                     yaml.getLong(path + ".core", 0)
             );
-            kingdom.setMonsterKills(yaml.getLong(path + ".monsterKills", 0));
+            ConfigurationSection quests = yaml.getConfigurationSection(path + ".quests");
+            if (quests != null) {
+                for (String questId : quests.getKeys(false)) {
+                    kingdom.setProgress(questId, quests.getLong(questId));
+                }
+            }
         }
     }
 
@@ -100,7 +106,9 @@ public class KingdomManager {
             yaml.set(path + ".points", kingdom.getPoints());
             yaml.set(path + ".coins", kingdom.getCoins());
             yaml.set(path + ".core", kingdom.getCore());
-            yaml.set(path + ".monsterKills", kingdom.getMonsterKills());
+            for (Map.Entry<String, Long> entry : kingdom.getQuestProgress().entrySet()) {
+                yaml.set(path + ".quests." + entry.getKey(), entry.getValue());
+            }
         }
         try {
             yaml.save(kingdomsFile);
@@ -108,4 +116,4 @@ public class KingdomManager {
             e.printStackTrace();
         }
     }
-}
+                }
