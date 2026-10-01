@@ -4,6 +4,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -11,11 +12,15 @@ import java.util.UUID;
 public class KingdomManager {
 
     private final Map<UUID, KingdomType> members = new HashMap<>();
+    private final Map<KingdomType, Kingdom> kingdoms = new EnumMap<>(KingdomType.class);
     private final File file;
 
     public KingdomManager(File dataFolder) {
         dataFolder.mkdirs();
         this.file = new File(dataFolder, "members.yml");
+        for (KingdomType type : KingdomType.values()) {
+            kingdoms.put(type, new Kingdom(type));
+        }
         load();
     }
 
@@ -25,6 +30,20 @@ public class KingdomManager {
 
     public KingdomType getKingdom(UUID player) {
         return members.get(player);
+    }
+
+    public Kingdom getKingdomData(UUID player) {
+        KingdomType type = members.get(player);
+        if (type == null) return null;
+        return kingdoms.get(type);
+    }
+
+    public int getMemberCount(KingdomType type) {
+        int count = 0;
+        for (KingdomType t : members.values()) {
+            if (t == type) count++;
+        }
+        return count;
     }
 
     public void join(UUID player, KingdomType kingdom) {
