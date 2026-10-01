@@ -2,11 +2,14 @@ package dev.kingdoms;
 
 public class Kingdom {
 
+    public static final long MONSTER_QUEST_GOAL = 5;
+
     private final KingdomType type;
     private int level = 1;
     private long points = 0;
     private long coins = 0;
     private long core = 0;
+    private long monsterKills = 0;
 
     public Kingdom(KingdomType type) {
         this.type = type;
@@ -30,6 +33,14 @@ public class Kingdom {
 
     public long getCore() {
         return core;
+    }
+
+    public long getMonsterKills() {
+        return monsterKills;
+    }
+
+    public void setMonsterKills(long monsterKills) {
+        this.monsterKills = monsterKills;
     }
 
     public void addPoints(long amount) {
