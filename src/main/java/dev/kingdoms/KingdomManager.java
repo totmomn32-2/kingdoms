@@ -88,6 +88,7 @@ public class KingdomManager {
                     yaml.getLong(path + ".coins", 0),
                     yaml.getLong(path + ".core", 0)
             );
+            kingdom.setMonsterKills(yaml.getLong(path + ".monsterKills", 0));
         }
     }
 
@@ -99,6 +100,7 @@ public class KingdomManager {
             yaml.set(path + ".points", kingdom.getPoints());
             yaml.set(path + ".coins", kingdom.getCoins());
             yaml.set(path + ".core", kingdom.getCore());
+            yaml.set(path + ".monsterKills", kingdom.getMonsterKills());
         }
         try {
             yaml.save(kingdomsFile);
