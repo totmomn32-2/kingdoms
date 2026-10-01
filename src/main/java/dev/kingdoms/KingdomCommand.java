@@ -9,9 +9,11 @@ import org.bukkit.entity.Player;
 public class KingdomCommand implements CommandExecutor {
 
     private final KingdomManager manager;
+    private final KingdomMenu menu;
 
-    public KingdomCommand(KingdomManager manager) {
+    public KingdomCommand(KingdomManager manager, KingdomMenu menu) {
         this.manager = manager;
+        this.menu = menu;
     }
 
     @Override
@@ -22,7 +24,7 @@ public class KingdomCommand implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            player.sendMessage(Component.text("Welcome to the Three Kingdoms!"));
+            menu.open(player);
             return true;
         }
 
