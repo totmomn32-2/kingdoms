@@ -4,9 +4,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class KingdomsPlugin extends JavaPlugin {
 
+    private KingdomManager kingdomManager;
+
     @Override
     public void onEnable() {
-        getCommand("kingdom").setExecutor(new KingdomCommand());
+        kingdomManager = new KingdomManager();
+        getCommand("kingdom").setExecutor(new KingdomCommand(kingdomManager));
         getLogger().info("Kingdoms plugin is ON!");
     }
 
