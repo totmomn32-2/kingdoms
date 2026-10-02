@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,10 @@ public class KingdomManager {
         KingdomType type = members.get(player);
         if (type == null) return null;
         return kingdoms.get(type);
+    }
+
+    public Collection<Kingdom> getAllKingdoms() {
+        return kingdoms.values();
     }
 
     public int getMemberCount(KingdomType type) {
@@ -116,4 +121,4 @@ public class KingdomManager {
             e.printStackTrace();
         }
     }
-                }
+}
