@@ -1,7 +1,11 @@
 package dev.kingdoms;
 
+import org.bukkit.Bukkit;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,6 +62,26 @@ public class KingdomManager {
     public void join(UUID player, KingdomType kingdom) {
         members.put(player, kingdom);
         saveMembers();
+        Player online = Bukkit.getPlayer(player);
+        if (online != null) {
+            applyUpgrades(online);
+        }
+    }
+
+    public void applyUpgrades(Player player) {
+        AttributeInstance health = player.getAttribute(Attribute.MAX_HEALTH);
+        if (health == null) return;
+        Kingdom kingdom = getKingdomData(player.getUniqueId());
+        int level = (kingdom == null) ? 0 : kingdom.getUpgradeLevel("health");
+        health.setBaseValue(20.0 + level * 2.0);
+    }
+
+    public void applyUpgradesToKingdom(KingdomType type) {
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (members.get(online.getUniqueId()) == type) {
+                applyUpgrades(online);
+            }
+        }
     }
 
     private void loadMembers() {
@@ -100,6 +124,12 @@ public class KingdomManager {
                     kingdom.setProgress(questId, quests.getLong(questId));
                 }
             }
+            ConfigurationSection upgrades = yaml.getConfigurationSection(path + ".upgrades");
+            if (upgrades != null) {
+                for (String upgradeId : upgrades.getKeys(false)) {
+                    kingdom.setUpgradeLevel(upgradeId, upgrades.getInt(upgradeId));
+                }
+            }
         }
     }
 
@@ -113,6 +143,9 @@ public class KingdomManager {
             yaml.set(path + ".core", kingdom.getCore());
             for (Map.Entry<String, Long> entry : kingdom.getQuestProgress().entrySet()) {
                 yaml.set(path + ".quests." + entry.getKey(), entry.getValue());
+            }
+            for (Map.Entry<String, Integer> entry : kingdom.getUpgrades().entrySet()) {
+                yaml.set(path + ".upgrades." + entry.getKey(), entry.getValue());
             }
         }
         try {
