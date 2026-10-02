@@ -131,6 +131,12 @@ public class KingdomManager {
                     kingdom.setUpgradeLevel(upgradeId, upgrades.getInt(upgradeId));
                 }
             }
+            ConfigurationSection projects = yaml.getConfigurationSection(path + ".projects");
+            if (projects != null) {
+                for (String projectId : projects.getKeys(false)) {
+                    kingdom.setProjectLevel(projectId, projects.getInt(projectId));
+                }
+            }
         }
     }
 
@@ -148,6 +154,9 @@ public class KingdomManager {
             for (Map.Entry<String, Integer> entry : kingdom.getUpgrades().entrySet()) {
                 yaml.set(path + ".upgrades." + entry.getKey(), entry.getValue());
             }
+            for (Map.Entry<String, Integer> entry : kingdom.getProjects().entrySet()) {
+                yaml.set(path + ".projects." + entry.getKey(), entry.getValue());
+            }
         }
         try {
             yaml.save(kingdomsFile);
@@ -155,4 +164,4 @@ public class KingdomManager {
             e.printStackTrace();
         }
     }
-}
+                }
