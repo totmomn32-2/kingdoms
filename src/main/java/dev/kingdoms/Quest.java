@@ -7,6 +7,7 @@ public record Quest(
         String target,
         long amount,
         long points,
-        long coins
+        long coins,
+        long core
 ) {
 }
