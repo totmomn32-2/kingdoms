@@ -5,15 +5,15 @@ import java.util.Map;
 
 public class Kingdom {
 
-    public static final long MONSTER_QUEST_GOAL = 5;
+    public static final int HEALTH_MAX_LEVEL = 5;
 
     private final KingdomType type;
     private int level = 1;
     private long points = 0;
     private long coins = 0;
     private long core = 0;
-    private long monsterKills = 0;
     private final Map<String, Long> questProgress = new HashMap<>();
+    private final Map<String, Integer> upgrades = new HashMap<>();
 
     public Kingdom(KingdomType type) {
         this.type = type;
@@ -39,14 +39,6 @@ public class Kingdom {
         return core;
     }
 
-    public long getMonsterKills() {
-        return monsterKills;
-    }
-
-    public void setMonsterKills(long monsterKills) {
-        this.monsterKills = monsterKills;
-    }
-
     public long getProgress(String questId) {
         return questProgress.getOrDefault(questId, 0L);
     }
@@ -57,6 +49,22 @@ public class Kingdom {
 
     public Map<String, Long> getQuestProgress() {
         return questProgress;
+    }
+
+    public int getUpgradeLevel(String id) {
+        return upgrades.getOrDefault(id, 0);
+    }
+
+    public void setUpgradeLevel(String id, int value) {
+        upgrades.put(id, value);
+    }
+
+    public Map<String, Integer> getUpgrades() {
+        return upgrades;
+    }
+
+    public long getHealthUpgradeCost() {
+        return 50L * (getUpgradeLevel("health") + 1);
     }
 
     public void addPoints(long amount) {
@@ -74,6 +82,12 @@ public class Kingdom {
     public boolean spendPoints(long amount) {
         if (points < amount) return false;
         points -= amount;
+        return true;
+    }
+
+    public boolean spendCoins(long amount) {
+        if (coins < amount) return false;
+        coins -= amount;
         return true;
     }
 
