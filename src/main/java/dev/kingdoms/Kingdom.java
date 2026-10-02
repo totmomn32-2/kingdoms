@@ -71,6 +71,20 @@ public class Kingdom {
         core += amount;
     }
 
+    public boolean spendPoints(long amount) {
+        if (points < amount) return false;
+        points -= amount;
+        return true;
+    }
+
+    public long getLevelUpCost() {
+        return 100L * level;
+    }
+
+    public void levelUp() {
+        level++;
+    }
+
     public void restore(int level, long points, long coins, long core) {
         this.level = level;
         this.points = points;
