@@ -107,6 +107,49 @@ public class KingdomCommand implements CommandExecutor {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("upgrades") || args[0].equalsIgnoreCase("upgrade")) {
+            Kingdom kingdom = manager.getKingdomData(player.getUniqueId());
+            if (kingdom == null) {
+                player.sendMessage(Component.text("Join a kingdom first. Use /kingdom"));
+                return true;
+            }
+
+            if (args.length < 2) {
+                int level = kingdom.getUpgradeLevel("health");
+                player.sendMessage(Component.text("=== Upgrades ==="));
+                if (level >= Kingdom.HEALTH_MAX_LEVEL) {
+                    player.sendMessage(Component.text("Health: " + level + "/" + Kingdom.HEALTH_MAX_LEVEL + " (MAX)"));
+                } else {
+                    player.sendMessage(Component.text("Health: " + level + "/" + Kingdom.HEALTH_MAX_LEVEL
+                            + " - next costs " + kingdom.getHealthUpgradeCost() + " coins"));
+                }
+                player.sendMessage(Component.text("Buy with: /kingdom upgrade health"));
+                return true;
+            }
+
+            if (args[1].equalsIgnoreCase("health")) {
+                int level = kingdom.getUpgradeLevel("health");
+                if (level >= Kingdom.HEALTH_MAX_LEVEL) {
+                    player.sendMessage(Component.text("Health upgrade is already at max level."));
+                    return true;
+                }
+                long cost = kingdom.getHealthUpgradeCost();
+                if (!kingdom.spendCoins(cost)) {
+                    player.sendMessage(Component.text("Not enough coins. You need " + cost
+                            + ", your kingdom has " + kingdom.getCoins() + "."));
+                    return true;
+                }
+                kingdom.setUpgradeLevel("health", level + 1);
+                manager.saveKingdoms();
+                manager.applyUpgradesToKingdom(kingdom.getType());
+                player.sendMessage(Component.text("Health upgraded to level " + (level + 1) + "! Everyone gets +1 heart."));
+                return true;
+            }
+
+            player.sendMessage(Component.text("Unknown upgrade. Try: /kingdom upgrade health"));
+            return true;
+        }
+
         // TEMPORARY command for testing, we will remove it later.
         if (args[0].equalsIgnoreCase("test")) {
             if (!player.isOp()) {
@@ -126,4 +169,4 @@ public class KingdomCommand implements CommandExecutor {
 
         return true;
     }
-                                   }
+                                                    }
