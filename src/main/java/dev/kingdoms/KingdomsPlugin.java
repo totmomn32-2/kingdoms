@@ -18,6 +18,7 @@ public class KingdomsPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(questMenu, this);
         getServer().getPluginManager().registerEvents(new MobKillListener(questManager), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(questManager), this);
+        getServer().getPluginManager().registerEvents(new JoinListener(kingdomManager), this);
 
         // Auto-save every 5 minutes (6000 ticks)
         getServer().getScheduler().runTaskTimer(this, () -> kingdomManager.saveKingdoms(), 6000L, 6000L);
