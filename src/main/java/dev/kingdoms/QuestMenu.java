@@ -14,6 +14,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class QuestMenu implements Listener {
@@ -73,17 +74,21 @@ public class QuestMenu implements Listener {
         Component bar = text("|".repeat(filled), NamedTextColor.GREEN)
                 .append(Component.text("|".repeat(10 - filled), NamedTextColor.DARK_GRAY));
 
+        List<Component> lore = new ArrayList<>();
+        lore.add(text("Progress: " + progress + "/" + quest.amount(), NamedTextColor.GRAY));
+        lore.add(bar);
+        lore.add(text("", NamedTextColor.GRAY));
+        lore.add(text("Rewards:", NamedTextColor.GRAY));
+        lore.add(text("+" + quest.points() + " Points", NamedTextColor.GOLD));
+        lore.add(text("+" + quest.coins() + " Coins", NamedTextColor.GOLD));
+        if (quest.core() > 0) {
+            lore.add(text("+" + quest.core() + " Kingdom Core", NamedTextColor.LIGHT_PURPLE));
+        }
+
         ItemStack item = new ItemStack(icon);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(text(quest.name(), NamedTextColor.YELLOW));
-        meta.lore(List.of(
-                text("Progress: " + progress + "/" + quest.amount(), NamedTextColor.GRAY),
-                bar,
-                text("", NamedTextColor.GRAY),
-                text("Rewards:", NamedTextColor.GRAY),
-                text("+" + quest.points() + " Points", NamedTextColor.GOLD),
-                text("+" + quest.coins() + " Coins", NamedTextColor.GOLD)
-        ));
+        meta.lore(lore);
         item.setItemMeta(meta);
         return item;
     }
@@ -98,4 +103,4 @@ public class QuestMenu implements Listener {
             event.setCancelled(true);
         }
     }
-    }
+            }
