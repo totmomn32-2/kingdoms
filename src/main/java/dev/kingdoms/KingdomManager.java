@@ -1,7 +1,6 @@
 package dev.kingdoms;
 
 import org.bukkit.Bukkit;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -69,11 +68,13 @@ public class KingdomManager {
     }
 
     public void applyUpgrades(Player player) {
-        AttributeInstance health = player.getAttribute(Attribute.MAX_HEALTH);
-        if (health == null) return;
         Kingdom kingdom = getKingdomData(player.getUniqueId());
-        int level = (kingdom == null) ? 0 : kingdom.getUpgradeLevel("health");
-        health.setBaseValue(20.0 + level * 2.0);
+        for (Upgrade upgrade : Upgrades.ALL) {
+            AttributeInstance instance = player.getAttribute(upgrade.attribute());
+            if (instance == null) continue;
+            int level = (kingdom == null) ? 0 : kingdom.getUpgradeLevel(upgrade.id());
+            instance.setBaseValue(upgrade.baseValue() + level * upgrade.perLevel());
+        }
     }
 
     public void applyUpgradesToKingdom(KingdomType type) {
