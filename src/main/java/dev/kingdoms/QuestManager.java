@@ -12,9 +12,10 @@ public class QuestManager {
     private final KingdomManager manager;
 
     private final List<Quest> quests = List.of(
-            new Quest("monster_hunters", "Monster Hunters", QuestType.KILL_MOB, "ANY_HOSTILE", 5, 50, 25),
-            new Quest("zombie_slayers", "Zombie Slayers", QuestType.KILL_MOB, "ZOMBIE", 10, 80, 40),
-            new Quest("stone_masons", "Stone Masons", QuestType.MINE_BLOCK, "STONE", 20, 40, 20)
+            new Quest("monster_hunters", "Monster Hunters", QuestType.KILL_MOB, "ANY_HOSTILE", 5, 50, 25, 0),
+            new Quest("zombie_slayers", "Zombie Slayers", QuestType.KILL_MOB, "ZOMBIE", 10, 80, 40, 0),
+            new Quest("stone_masons", "Stone Masons", QuestType.MINE_BLOCK, "STONE", 20, 40, 20, 0),
+            new Quest("wither_hunters", "Wither Hunters", QuestType.KILL_MOB, "WITHER_SKELETON", 3, 200, 100, 1)
     );
 
     public QuestManager(KingdomManager manager) {
@@ -39,12 +40,17 @@ public class QuestManager {
                 kingdom.setProgress(quest.id(), 0);
                 kingdom.addPoints(quest.points());
                 kingdom.addCoins(quest.coins());
+                kingdom.addCore(quest.core());
                 manager.saveKingdoms();
+
+                String reward = "+" + quest.points() + " Points, +" + quest.coins() + " Coins";
+                if (quest.core() > 0) {
+                    reward += ", +" + quest.core() + " Core";
+                }
 
                 for (Player online : Bukkit.getOnlinePlayers()) {
                     if (manager.getKingdom(online.getUniqueId()) == kingdom.getType()) {
-                        online.sendMessage(Component.text("Quest complete: " + quest.name()
-                                + "! +" + quest.points() + " Points, +" + quest.coins() + " Coins"));
+                        online.sendMessage(Component.text("Quest complete: " + quest.name() + "! " + reward));
                     }
                 }
             } else {
