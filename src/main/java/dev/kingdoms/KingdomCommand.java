@@ -6,6 +6,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 public class KingdomCommand implements CommandExecutor {
 
     private final KingdomManager manager;
@@ -70,6 +74,21 @@ public class KingdomCommand implements CommandExecutor {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("top")) {
+            List<Kingdom> ranking = new ArrayList<>(manager.getAllKingdoms());
+            ranking.sort(Comparator.comparingInt(Kingdom::getLevel)
+                    .thenComparingLong(Kingdom::getPoints)
+                    .reversed());
+
+            player.sendMessage(Component.text("=== Kingdom Ranking ==="));
+            for (int i = 0; i < ranking.size(); i++) {
+                Kingdom k = ranking.get(i);
+                player.sendMessage(Component.text("#" + (i + 1) + " " + k.getType().getDisplayName()
+                        + " - Level " + k.getLevel() + " (" + k.getPoints() + " points)"));
+            }
+            return true;
+        }
+
         if (args[0].equalsIgnoreCase("levelup")) {
             Kingdom kingdom = manager.getKingdomData(player.getUniqueId());
             if (kingdom == null) {
@@ -107,4 +126,4 @@ public class KingdomCommand implements CommandExecutor {
 
         return true;
     }
-}
+                                   }
