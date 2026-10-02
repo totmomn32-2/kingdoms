@@ -60,12 +60,31 @@ public class KingdomCommand implements CommandExecutor {
                 player.sendMessage(Component.text("Coins: " + kingdom.getCoins()));
                 player.sendMessage(Component.text("Core: " + kingdom.getCore()));
                 player.sendMessage(Component.text("Members: " + manager.getMemberCount(kingdom.getType())));
+                player.sendMessage(Component.text("Next level costs: " + kingdom.getLevelUpCost() + " points"));
             }
             return true;
         }
 
         if (args[0].equalsIgnoreCase("quests")) {
             questMenu.open(player);
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("levelup")) {
+            Kingdom kingdom = manager.getKingdomData(player.getUniqueId());
+            if (kingdom == null) {
+                player.sendMessage(Component.text("Join a kingdom first. Use /kingdom"));
+                return true;
+            }
+            long cost = kingdom.getLevelUpCost();
+            if (!kingdom.spendPoints(cost)) {
+                player.sendMessage(Component.text("Not enough points. You need " + cost
+                        + ", your kingdom has " + kingdom.getPoints() + "."));
+                return true;
+            }
+            kingdom.levelUp();
+            manager.saveKingdoms();
+            player.sendMessage(Component.text("Your kingdom reached level " + kingdom.getLevel() + "!"));
             return true;
         }
 
