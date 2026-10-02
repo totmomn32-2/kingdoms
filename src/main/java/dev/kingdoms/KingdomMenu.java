@@ -35,11 +35,13 @@ public class KingdomMenu implements Listener {
     private final KingdomManager manager;
     private final QuestMenu questMenu;
     private final UpgradeMenu upgradeMenu;
+    private final ProjectMenu projectMenu;
 
-    public KingdomMenu(KingdomManager manager, QuestMenu questMenu, UpgradeMenu upgradeMenu) {
+    public KingdomMenu(KingdomManager manager, QuestMenu questMenu, UpgradeMenu upgradeMenu, ProjectMenu projectMenu) {
         this.manager = manager;
         this.questMenu = questMenu;
         this.upgradeMenu = upgradeMenu;
+        this.projectMenu = projectMenu;
     }
 
     public void open(Player player) {
@@ -85,6 +87,10 @@ public class KingdomMenu implements Listener {
                 text("Cost: " + kingdom.getLevelUpCost() + " points", NamedTextColor.GOLD),
                 text("Kingdom points: " + kingdom.getPoints(), NamedTextColor.GRAY),
                 text("Click to level up", NamedTextColor.YELLOW)));
+
+        inventory.setItem(22, item(Material.BEACON, text("Projects", NamedTextColor.YELLOW),
+                text("Build the castle, market and more", NamedTextColor.GRAY),
+                text("Click to open", NamedTextColor.YELLOW)));
     }
 
     private ItemStack joinItem(KingdomType type) {
@@ -152,6 +158,7 @@ public class KingdomMenu implements Listener {
             case 12 -> questMenu.open(player);
             case 14 -> upgradeMenu.open(player);
             case 16 -> levelUp(player, kingdom, inventory);
+            case 22 -> projectMenu.open(player);
             default -> {
             }
         }
@@ -188,4 +195,4 @@ public class KingdomMenu implements Listener {
         manager.join(player.getUniqueId(), type);
         player.sendMessage(Component.text("You joined the " + type.getDisplayName() + "!"));
     }
-    }
+}
