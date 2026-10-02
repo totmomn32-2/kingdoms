@@ -14,6 +14,7 @@ public class Kingdom {
     private long core = 0;
     private final Map<String, Long> questProgress = new HashMap<>();
     private final Map<String, Integer> upgrades = new HashMap<>();
+    private final Map<String, Integer> projects = new HashMap<>();
 
     public Kingdom(KingdomType type) {
         this.type = type;
@@ -63,6 +64,18 @@ public class Kingdom {
         return upgrades;
     }
 
+    public int getProjectLevel(String id) {
+        return projects.getOrDefault(id, 0);
+    }
+
+    public void setProjectLevel(String id, int value) {
+        projects.put(id, value);
+    }
+
+    public Map<String, Integer> getProjects() {
+        return projects;
+    }
+
     public long getHealthUpgradeCost() {
         return 50L * (getUpgradeLevel("health") + 1);
     }
@@ -88,6 +101,12 @@ public class Kingdom {
     public boolean spendCoins(long amount) {
         if (coins < amount) return false;
         coins -= amount;
+        return true;
+    }
+
+    public boolean spendCore(long amount) {
+        if (core < amount) return false;
+        core -= amount;
         return true;
     }
 
