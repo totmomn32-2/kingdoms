@@ -57,6 +57,7 @@ public class QuestManager {
                     type,
                     q.getString("target", "ANY").toUpperCase(Locale.ROOT),
                     Math.max(1, q.getLong("amount", 1)),
+                    Math.max(1, q.getInt("min-contributors", 1)),
                     q.getLong("points"),
                     q.getLong("coins"),
                     q.getLong("core")
@@ -77,14 +78,17 @@ public class QuestManager {
             if (quest.type() != type) continue;
             if (!Arrays.asList(keys).contains(quest.target())) continue;
 
-            long progress = kingdom.getProgress(quest.id()) + 1;
+            long progress = Math.min(kingdom.getProgress(quest.id()) + 1, quest.amount());
+            kingdom.addContributor(quest.id(), player.getUniqueId());
+            int contributors = kingdom.getContributorCount(quest.id());
 
-            if (progress >= quest.amount()) {
+            if (progress >= quest.amount() && contributors >= quest.minContributors()) {
                 // Project bonuses: +10% per level
                 long points = quest.points() + quest.points() * kingdom.getProjectLevel("academy") * 10 / 100;
                 long coins = quest.coins() + quest.coins() * kingdom.getProjectLevel("market") * 10 / 100;
 
                 kingdom.setProgress(quest.id(), 0);
+                kingdom.clearContributors(quest.id());
                 kingdom.addPoints(points);
                 kingdom.addCoins(coins);
                 kingdom.addCore(quest.core());
@@ -102,7 +106,16 @@ public class QuestManager {
                 }
             } else {
                 kingdom.setProgress(quest.id(), progress);
-                player.sendActionBar(Component.text(quest.name() + ": " + progress + "/" + quest.amount()));
+                if (progress >= quest.amount()) {
+                    int missing = quest.minContributors() - contributors;
+                    player.sendActionBar(Component.text(quest.name() + ": waiting for " + missing
+                            + " more member(s) to contribute"));
+                } else if (quest.minContributors() > 1) {
+                    player.sendActionBar(Component.text(quest.name() + ": " + progress + "/" + quest.amount()
+                            + " (members " + contributors + "/" + quest.minContributors() + ")"));
+                } else {
+                    player.sendActionBar(Component.text(quest.name() + ": " + progress + "/" + quest.amount()));
+                }
             }
         }
     }
