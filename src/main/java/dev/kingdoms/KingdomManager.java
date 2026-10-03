@@ -49,6 +49,10 @@ public class KingdomManager {
         return kingdoms.get(type);
     }
 
+    public Kingdom getKingdomData(KingdomType type) {
+        return kingdoms.get(type);
+    }
+
     public Collection<Kingdom> getAllKingdoms() {
         return kingdoms.values();
     }
@@ -68,6 +72,16 @@ public class KingdomManager {
         if (online != null) {
             applyUpgrades(online);
         }
+    }
+
+    public boolean leave(UUID player) {
+        if (members.remove(player) == null) return false;
+        saveMembers();
+        Player online = Bukkit.getPlayer(player);
+        if (online != null) {
+            applyUpgrades(online);
+        }
+        return true;
     }
 
     public void applyUpgrades(Player player) {
@@ -187,4 +201,4 @@ public class KingdomManager {
             e.printStackTrace();
         }
     }
-}
+    }
