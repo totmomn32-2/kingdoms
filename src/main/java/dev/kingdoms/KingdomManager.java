@@ -8,10 +8,13 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class KingdomManager {
@@ -125,6 +128,18 @@ public class KingdomManager {
                     kingdom.setProgress(questId, quests.getLong(questId));
                 }
             }
+            ConfigurationSection contributors = yaml.getConfigurationSection(path + ".contributors");
+            if (contributors != null) {
+                for (String questId : contributors.getKeys(false)) {
+                    for (String raw : contributors.getStringList(questId)) {
+                        try {
+                            kingdom.addContributor(questId, UUID.fromString(raw));
+                        } catch (IllegalArgumentException ignored) {
+                            // skip bad entries
+                        }
+                    }
+                }
+            }
             ConfigurationSection upgrades = yaml.getConfigurationSection(path + ".upgrades");
             if (upgrades != null) {
                 for (String upgradeId : upgrades.getKeys(false)) {
@@ -151,6 +166,14 @@ public class KingdomManager {
             for (Map.Entry<String, Long> entry : kingdom.getQuestProgress().entrySet()) {
                 yaml.set(path + ".quests." + entry.getKey(), entry.getValue());
             }
+            for (Map.Entry<String, Set<UUID>> entry : kingdom.getQuestContributors().entrySet()) {
+                if (entry.getValue().isEmpty()) continue;
+                List<String> ids = new ArrayList<>();
+                for (UUID id : entry.getValue()) {
+                    ids.add(id.toString());
+                }
+                yaml.set(path + ".contributors." + entry.getKey(), ids);
+            }
             for (Map.Entry<String, Integer> entry : kingdom.getUpgrades().entrySet()) {
                 yaml.set(path + ".upgrades." + entry.getKey(), entry.getValue());
             }
@@ -164,4 +187,4 @@ public class KingdomManager {
             e.printStackTrace();
         }
     }
-                }
+}
