@@ -67,6 +67,7 @@ public class QuestMenu implements Listener {
         Material icon = switch (quest.type()) {
             case KILL_MOB -> Material.IRON_SWORD;
             case MINE_BLOCK -> Material.IRON_PICKAXE;
+            default -> Material.IRON_HOE;
         };
 
         long progress = kingdom.getProgress(quest.id());
@@ -103,4 +104,4 @@ public class QuestMenu implements Listener {
             event.setCancelled(true);
         }
     }
-            }
+}
