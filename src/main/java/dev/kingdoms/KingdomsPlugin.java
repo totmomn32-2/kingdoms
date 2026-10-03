@@ -9,7 +9,7 @@ public class KingdomsPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         kingdomManager = new KingdomManager(getDataFolder());
-        QuestManager questManager = new QuestManager(kingdomManager);
+        QuestManager questManager = new QuestManager(kingdomManager, this);
         QuestMenu questMenu = new QuestMenu(kingdomManager, questManager);
         UpgradeMenu upgradeMenu = new UpgradeMenu(kingdomManager);
         ProjectMenu projectMenu = new ProjectMenu(kingdomManager);
