@@ -1,5 +1,6 @@
 package dev.kingdoms;
 
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -20,12 +21,15 @@ public class MobKillListener implements Listener {
     @EventHandler
     public void onMobDeath(EntityDeathEvent event) {
         LivingEntity dead = event.getEntity();
-        if (!(dead instanceof Enemy)) return;
+        boolean hostile = dead instanceof Enemy;
+        boolean animal = dead instanceof Animals;
+        if (!hostile && !animal) return;
 
         Player killer = dead.getKiller();
         if (killer == null) return;
 
         String mobName = dead.getType().getKey().getKey().toUpperCase(Locale.ROOT);
-        quests.addProgress(killer, QuestType.KILL_MOB, "ANY_HOSTILE", mobName);
+        String category = hostile ? "ANY_HOSTILE" : "ANY_ANIMAL";
+        quests.addProgress(killer, QuestType.KILL_MOB, category, mobName);
     }
 }
