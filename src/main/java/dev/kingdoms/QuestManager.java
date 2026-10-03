@@ -2,26 +2,64 @@ package dev.kingdoms;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class QuestManager {
 
     private final KingdomManager manager;
+    private final JavaPlugin plugin;
+    private final List<Quest> quests = new ArrayList<>();
 
-    private final List<Quest> quests = List.of(
-            new Quest("monster_hunters", "Monster Hunters", QuestType.KILL_MOB, "ANY_HOSTILE", 5, 50, 25, 0),
-            new Quest("zombie_slayers", "Zombie Slayers", QuestType.KILL_MOB, "ZOMBIE", 10, 80, 40, 0),
-            new Quest("stone_masons", "Stone Masons", QuestType.MINE_BLOCK, "STONE", 20, 40, 20, 0),
-            new Quest("wither_hunters", "Wither Hunters", QuestType.KILL_MOB, "WITHER_SKELETON", 3, 200, 100, 1),
-            new Quest("wheat_farmers", "Wheat Farmers", QuestType.HARVEST_CROP, "WHEAT", 10, 60, 30, 0),
-            new Quest("animal_hunters", "Animal Hunters", QuestType.KILL_MOB, "ANY_ANIMAL", 5, 40, 20, 0)
-    );
-
-    public QuestManager(KingdomManager manager) {
+    public QuestManager(KingdomManager manager, JavaPlugin plugin) {
         this.manager = manager;
+        this.plugin = plugin;
+        load();
+    }
+
+    private void load() {
+        File file = new File(plugin.getDataFolder(), "quests.yml");
+        if (!file.exists()) {
+            plugin.saveResource("quests.yml", false);
+        }
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+        ConfigurationSection section = yaml.getConfigurationSection("quests");
+        quests.clear();
+        if (section == null) return;
+
+        for (String id : section.getKeys(false)) {
+            ConfigurationSection q = section.getConfigurationSection(id);
+            if (q == null) continue;
+
+            QuestType type;
+            try {
+                type = QuestType.valueOf(q.getString("type", "").toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().warning("Quest '" + id + "' has an invalid type, skipping it.");
+                continue;
+            }
+
+            quests.add(new Quest(
+                    id,
+                    q.getString("name", id),
+                    type,
+                    q.getString("target", "ANY").toUpperCase(Locale.ROOT),
+                    Math.max(1, q.getLong("amount", 1)),
+                    q.getLong("points"),
+                    q.getLong("coins"),
+                    q.getLong("core")
+            ));
+        }
+        plugin.getLogger().info("Loaded " + quests.size() + " quests.");
     }
 
     public List<Quest> getQuests() {
