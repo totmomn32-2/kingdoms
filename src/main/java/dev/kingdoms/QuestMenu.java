@@ -114,6 +114,10 @@ public class QuestMenu implements Listener {
         List<Component> lore = new ArrayList<>();
         lore.add(text("Progress: " + progress + "/" + quest.amount(), NamedTextColor.GRAY));
         lore.add(bar);
+        if (quest.minContributors() > 1) {
+            lore.add(text("Group quest: " + kingdom.getContributorCount(quest.id()) + "/"
+                    + quest.minContributors() + " members contributed", NamedTextColor.AQUA));
+        }
         lore.add(text("", NamedTextColor.GRAY));
         lore.add(text("Rewards:", NamedTextColor.GRAY));
         lore.add(text("+" + quest.points() + " Points", NamedTextColor.GOLD));
@@ -149,4 +153,4 @@ public class QuestMenu implements Listener {
             open(player, holder.page + 1);
         }
     }
-}
+                                                }
