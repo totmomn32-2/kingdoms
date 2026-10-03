@@ -1,0 +1,52 @@
+# Add new quests here. No code changes needed.
+# type: KILL_MOB, MINE_BLOCK or HARVEST_CROP
+# target: ANY_HOSTILE, ANY_ANIMAL, or a name like ZOMBIE, STONE, WHEAT
+quests:
+  monster_hunters:
+    name: "Monster Hunters"
+    type: KILL_MOB
+    target: ANY_HOSTILE
+    amount: 5
+    points: 50
+    coins: 25
+    core: 0
+  zombie_slayers:
+    name: "Zombie Slayers"
+    type: KILL_MOB
+    target: ZOMBIE
+    amount: 10
+    points: 80
+    coins: 40
+    core: 0
+  stone_masons:
+    name: "Stone Masons"
+    type: MINE_BLOCK
+    target: STONE
+    amount: 20
+    points: 40
+    coins: 20
+    core: 0
+  wither_hunters:
+    name: "Wither Hunters"
+    type: KILL_MOB
+    target: WITHER_SKELETON
+    amount: 3
+    points: 200
+    coins: 100
+    core: 1
+  wheat_farmers:
+    name: "Wheat Farmers"
+    type: HARVEST_CROP
+    target: WHEAT
+    amount: 10
+    points: 60
+    coins: 30
+    core: 0
+  animal_hunters:
+    name: "Animal Hunters"
+    type: KILL_MOB
+    target: ANY_ANIMAL
+    amount: 5
+    points: 40
+    coins: 20
+    core: 0
