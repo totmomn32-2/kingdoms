@@ -156,4 +156,4 @@ public class KingdomCommand implements CommandExecutor {
         sender.sendMessage(Component.text("Usage: /kingdom admin reload"));
         return true;
     }
-        }
+}
