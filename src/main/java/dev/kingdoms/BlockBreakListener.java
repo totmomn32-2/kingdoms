@@ -1,6 +1,8 @@
 package dev.kingdoms;
 
 import org.bukkit.GameMode;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +21,16 @@ public class BlockBreakListener implements Listener {
         Player player = event.getPlayer();
         if (player.getGameMode() != GameMode.SURVIVAL) return;
 
-        String blockName = event.getBlock().getType().name();
+        Block block = event.getBlock();
+        String blockName = block.getType().name();
+
+        if (block.getBlockData() instanceof Ageable crop) {
+            if (crop.getAge() >= crop.getMaximumAge()) {
+                quests.addProgress(player, QuestType.HARVEST_CROP, blockName);
+            }
+            return;
+        }
+
         quests.addProgress(player, QuestType.MINE_BLOCK, blockName);
     }
 }
