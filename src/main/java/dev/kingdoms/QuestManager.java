@@ -15,7 +15,9 @@ public class QuestManager {
             new Quest("monster_hunters", "Monster Hunters", QuestType.KILL_MOB, "ANY_HOSTILE", 5, 50, 25, 0),
             new Quest("zombie_slayers", "Zombie Slayers", QuestType.KILL_MOB, "ZOMBIE", 10, 80, 40, 0),
             new Quest("stone_masons", "Stone Masons", QuestType.MINE_BLOCK, "STONE", 20, 40, 20, 0),
-            new Quest("wither_hunters", "Wither Hunters", QuestType.KILL_MOB, "WITHER_SKELETON", 3, 200, 100, 1)
+            new Quest("wither_hunters", "Wither Hunters", QuestType.KILL_MOB, "WITHER_SKELETON", 3, 200, 100, 1),
+            new Quest("wheat_farmers", "Wheat Farmers", QuestType.HARVEST_CROP, "WHEAT", 10, 60, 30, 0),
+            new Quest("animal_hunters", "Animal Hunters", QuestType.KILL_MOB, "ANY_ANIMAL", 5, 40, 20, 0)
     );
 
     public QuestManager(KingdomManager manager) {
