@@ -37,13 +37,17 @@ public class QuestManager {
             long progress = kingdom.getProgress(quest.id()) + 1;
 
             if (progress >= quest.amount()) {
+                // Project bonuses: +10% per level
+                long points = quest.points() + quest.points() * kingdom.getProjectLevel("academy") * 10 / 100;
+                long coins = quest.coins() + quest.coins() * kingdom.getProjectLevel("market") * 10 / 100;
+
                 kingdom.setProgress(quest.id(), 0);
-                kingdom.addPoints(quest.points());
-                kingdom.addCoins(quest.coins());
+                kingdom.addPoints(points);
+                kingdom.addCoins(coins);
                 kingdom.addCore(quest.core());
                 manager.saveKingdoms();
 
-                String reward = "+" + quest.points() + " Points, +" + quest.coins() + " Coins";
+                String reward = "+" + points + " Points, +" + coins + " Coins";
                 if (quest.core() > 0) {
                     reward += ", +" + quest.core() + " Core";
                 }
