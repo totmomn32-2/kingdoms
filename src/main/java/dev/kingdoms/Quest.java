@@ -6,6 +6,7 @@ public record Quest(
         QuestType type,
         String target,
         long amount,
+        int minContributors,
         long points,
         long coins,
         long core
