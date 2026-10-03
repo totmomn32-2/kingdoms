@@ -25,7 +25,7 @@ public class QuestManager {
         load();
     }
 
-    private void load() {
+    public void load() {
         File file = new File(plugin.getDataFolder(), "quests.yml");
         if (!file.exists()) {
             plugin.saveResource("quests.yml", false);
@@ -34,7 +34,10 @@ public class QuestManager {
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection section = yaml.getConfigurationSection("quests");
         quests.clear();
-        if (section == null) return;
+        if (section == null) {
+            plugin.getLogger().warning("quests.yml has no 'quests:' section.");
+            return;
+        }
 
         for (String id : section.getKeys(false)) {
             ConfigurationSection q = section.getConfigurationSection(id);
@@ -103,4 +106,4 @@ public class QuestManager {
             }
         }
     }
-}
+                              }
