@@ -16,16 +16,23 @@ public class KingdomCommand implements CommandExecutor {
     private final KingdomMenu menu;
     private final QuestMenu questMenu;
     private final UpgradeMenu upgradeMenu;
+    private final QuestManager questManager;
 
-    public KingdomCommand(KingdomManager manager, KingdomMenu menu, QuestMenu questMenu, UpgradeMenu upgradeMenu) {
+    public KingdomCommand(KingdomManager manager, KingdomMenu menu, QuestMenu questMenu,
+                          UpgradeMenu upgradeMenu, QuestManager questManager) {
         this.manager = manager;
         this.menu = menu;
         this.questMenu = questMenu;
         this.upgradeMenu = upgradeMenu;
+        this.questManager = questManager;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("admin")) {
+            return handleAdmin(sender, args);
+        }
+
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("Only players can use this command."));
             return true;
@@ -133,4 +140,20 @@ public class KingdomCommand implements CommandExecutor {
 
         return true;
     }
-}
+
+    private boolean handleAdmin(CommandSender sender, String[] args) {
+        if (!sender.isOp()) {
+            sender.sendMessage(Component.text("Only operators can use this."));
+            return true;
+        }
+
+        if (args.length >= 2 && args[1].equalsIgnoreCase("reload")) {
+            questManager.load();
+            sender.sendMessage(Component.text("Quests reloaded: " + questManager.getQuests().size() + " quests."));
+            return true;
+        }
+
+        sender.sendMessage(Component.text("Usage: /kingdom admin reload"));
+        return true;
+    }
+        }
