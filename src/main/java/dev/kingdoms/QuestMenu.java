@@ -19,8 +19,18 @@ import java.util.List;
 
 public class QuestMenu implements Listener {
 
+    private static final int PER_PAGE = 45;
+    private static final int PREV_SLOT = 45;
+    private static final int INFO_SLOT = 49;
+    private static final int NEXT_SLOT = 53;
+
     private static class MenuHolder implements InventoryHolder {
         private Inventory inventory;
+        private final int page;
+
+        MenuHolder(int page) {
+            this.page = page;
+        }
 
         @Override
         public Inventory getInventory() {
@@ -37,30 +47,56 @@ public class QuestMenu implements Listener {
     }
 
     public void open(Player player) {
+        open(player, 0);
+    }
+
+    public void open(Player player, int page) {
         Kingdom kingdom = manager.getKingdomData(player.getUniqueId());
         if (kingdom == null) {
             player.sendMessage(Component.text("Join a kingdom first. Use /kingdom"));
             return;
         }
 
-        MenuHolder holder = new MenuHolder();
-        Inventory inventory = Bukkit.createInventory(holder, 27, Component.text("Kingdom Quests"));
+        List<Quest> list = quests.getQuests();
+        int pages = Math.max(1, (list.size() + PER_PAGE - 1) / PER_PAGE);
+        int current = Math.max(0, Math.min(page, pages - 1));
+
+        MenuHolder holder = new MenuHolder(current);
+        Inventory inventory = Bukkit.createInventory(holder, 54, Component.text("Kingdom Quests"));
         holder.inventory = inventory;
 
         ItemStack filler = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta fillerMeta = filler.getItemMeta();
         fillerMeta.displayName(Component.text(" "));
         filler.setItemMeta(fillerMeta);
-        for (int i = 0; i < 27; i++) {
+        for (int i = 0; i < 54; i++) {
             inventory.setItem(i, filler);
         }
 
-        List<Quest> list = quests.getQuests();
-        for (int i = 0; i < list.size() && i < 7; i++) {
-            inventory.setItem(10 + i, createItem(list.get(i), kingdom));
+        for (int i = 0; i < PER_PAGE; i++) {
+            int index = current * PER_PAGE + i;
+            if (index >= list.size()) break;
+            inventory.setItem(i, createItem(list.get(index), kingdom));
+        }
+
+        inventory.setItem(INFO_SLOT, simpleItem(Material.PAPER,
+                "Page " + (current + 1) + "/" + pages, NamedTextColor.WHITE));
+        if (current > 0) {
+            inventory.setItem(PREV_SLOT, simpleItem(Material.ARROW, "Previous page", NamedTextColor.YELLOW));
+        }
+        if (current < pages - 1) {
+            inventory.setItem(NEXT_SLOT, simpleItem(Material.ARROW, "Next page", NamedTextColor.YELLOW));
         }
 
         player.openInventory(inventory);
+    }
+
+    private ItemStack simpleItem(Material material, String name, NamedTextColor color) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(text(name, color));
+        item.setItemMeta(meta);
+        return item;
     }
 
     private ItemStack createItem(Quest quest, Kingdom kingdom) {
@@ -71,7 +107,7 @@ public class QuestMenu implements Listener {
         };
 
         long progress = kingdom.getProgress(quest.id());
-        int filled = (int) (progress * 10 / quest.amount());
+        int filled = (int) Math.min(10, progress * 10 / quest.amount());
         Component bar = text("|".repeat(filled), NamedTextColor.GREEN)
                 .append(Component.text("|".repeat(10 - filled), NamedTextColor.DARK_GRAY));
 
@@ -100,8 +136,17 @@ public class QuestMenu implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (event.getView().getTopInventory().getHolder() instanceof MenuHolder) {
-            event.setCancelled(true);
+        if (!(event.getView().getTopInventory().getHolder() instanceof MenuHolder holder)) return;
+        event.setCancelled(true);
+
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (event.getClickedInventory() != event.getView().getTopInventory()) return;
+
+        int slot = event.getSlot();
+        if (slot == PREV_SLOT && holder.page > 0) {
+            open(player, holder.page - 1);
+        } else if (slot == NEXT_SLOT && quests.getQuests().size() > (holder.page + 1) * PER_PAGE) {
+            open(player, holder.page + 1);
         }
     }
 }
