@@ -79,31 +79,4 @@ public class QuestManager {
 
             long progress = kingdom.getProgress(quest.id()) + 1;
 
-            if (progress >= quest.amount()) {
-                // Project bonuses: +10% per level
-                long points = quest.points() + quest.points() * kingdom.getProjectLevel("academy") * 10 / 100;
-                long coins = quest.coins() + quest.coins() * kingdom.getProjectLevel("market") * 10 / 100;
-
-                kingdom.setProgress(quest.id(), 0);
-                kingdom.addPoints(points);
-                kingdom.addCoins(coins);
-                kingdom.addCore(quest.core());
-                manager.saveKingdoms();
-
-                String reward = "+" + points + " Points, +" + coins + " Coins";
-                if (quest.core() > 0) {
-                    reward += ", +" + quest.core() + " Core";
-                }
-
-                for (Player online : Bukkit.getOnlinePlayers()) {
-                    if (manager.getKingdom(online.getUniqueId()) == kingdom.getType()) {
-                        online.sendMessage(Component.text("Quest complete: " + quest.name() + "! " + reward));
-                    }
-                }
-            } else {
-                kingdom.setProgress(quest.id(), progress);
-                player.sendActionBar(Component.text(quest.name() + ": " + progress + "/" + quest.amount()));
-            }
-        }
-    }
-                              }
+            if (progres
