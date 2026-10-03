@@ -2,5 +2,6 @@ package dev.kingdoms;
 
 public enum QuestType {
     KILL_MOB,
-    MINE_BLOCK
+    MINE_BLOCK,
+    HARVEST_CROP
 }
