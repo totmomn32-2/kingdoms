@@ -1,6 +1,8 @@
 package dev.kingdoms;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -9,6 +11,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 public class KingdomCommand implements CommandExecutor {
 
@@ -121,23 +124,6 @@ public class KingdomCommand implements CommandExecutor {
             return true;
         }
 
-        // TEMPORARY command for testing, we will remove it later.
-        if (args[0].equalsIgnoreCase("test")) {
-            if (!player.isOp()) {
-                player.sendMessage(Component.text("Only operators can use this."));
-                return true;
-            }
-            Kingdom kingdom = manager.getKingdomData(player.getUniqueId());
-            if (kingdom == null) {
-                player.sendMessage(Component.text("Join a kingdom first."));
-                return true;
-            }
-            kingdom.addPoints(100);
-            kingdom.addCoins(50);
-            player.sendMessage(Component.text("Added 100 points and 50 coins."));
-            return true;
-        }
-
         return true;
     }
 
@@ -153,7 +139,75 @@ public class KingdomCommand implements CommandExecutor {
             return true;
         }
 
-        sender.sendMessage(Component.text("Usage: /kingdom admin reload"));
+        if (args.length >= 2 && args[1].equalsIgnoreCase("give")) {
+            return handleGive(sender, args);
+        }
+
+        if (args.length >= 2 && args[1].equalsIgnoreCase("kick")) {
+            return handleKick(sender, args);
+        }
+
+        sender.sendMessage(Component.text("Admin commands:"));
+        sender.sendMessage(Component.text("/kingdom admin reload"));
+        sender.sendMessage(Component.text("/kingdom admin give <red|blue|green> <points|coins|core> <amount>"));
+        sender.sendMessage(Component.text("/kingdom admin kick <player>"));
+        return true;
+    }
+
+    private boolean handleGive(CommandSender sender, String[] args) {
+        if (args.length < 5) {
+            sender.sendMessage(Component.text("Usage: /kingdom admin give <red|blue|green> <points|coins|core> <amount>"));
+            return true;
+        }
+
+        KingdomType type = KingdomType.fromString(args[2]);
+        if (type == null) {
+            sender.sendMessage(Component.text("Unknown kingdom. Choose red, blue or green."));
+            return true;
+        }
+
+        long amount;
+        try {
+            amount = Long.parseLong(args[4]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage(Component.text("The amount must be a number."));
+            return true;
+        }
+
+        Kingdom kingdom = manager.getKingdomData(type);
+        String what = args[3].toLowerCase(Locale.ROOT);
+        switch (what) {
+            case "points" -> kingdom.addPoints(amount);
+            case "coins" -> kingdom.addCoins(amount);
+            case "core" -> kingdom.addCore(amount);
+            default -> {
+                sender.sendMessage(Component.text("Choose points, coins or core."));
+                return true;
+            }
+        }
+
+        manager.saveKingdoms();
+        sender.sendMessage(Component.text("Gave " + amount + " " + what + " to the " + type.getDisplayName() + "."));
+        return true;
+    }
+
+    private boolean handleKick(CommandSender sender, String[] args) {
+        if (args.length < 3) {
+            sender.sendMessage(Component.text("Usage: /kingdom admin kick <player>"));
+            return true;
+        }
+
+        OfflinePlayer target = Bukkit.getOfflinePlayerIfCached(args[2]);
+        if (target == null) {
+            sender.sendMessage(Component.text("Player not found (they must have joined the server before)."));
+            return true;
+        }
+
+        if (manager.leave(target.getUniqueId())) {
+            sender.sendMessage(Component.text(args[2] + " was removed from their kingdom."));
+        } else {
+            sender.sendMessage(Component.text(args[2] + " is not in a kingdom."));
+        }
         return true;
     }
 }
