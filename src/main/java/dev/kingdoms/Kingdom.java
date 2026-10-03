@@ -1,7 +1,10 @@
 package dev.kingdoms;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class Kingdom {
 
@@ -13,6 +16,7 @@ public class Kingdom {
     private long coins = 0;
     private long core = 0;
     private final Map<String, Long> questProgress = new HashMap<>();
+    private final Map<String, Set<UUID>> questContributors = new HashMap<>();
     private final Map<String, Integer> upgrades = new HashMap<>();
     private final Map<String, Integer> projects = new HashMap<>();
 
@@ -50,6 +54,23 @@ public class Kingdom {
 
     public Map<String, Long> getQuestProgress() {
         return questProgress;
+    }
+
+    public void addContributor(String questId, UUID player) {
+        questContributors.computeIfAbsent(questId, k -> new HashSet<>()).add(player);
+    }
+
+    public int getContributorCount(String questId) {
+        Set<UUID> set = questContributors.get(questId);
+        return set == null ? 0 : set.size();
+    }
+
+    public void clearContributors(String questId) {
+        questContributors.remove(questId);
+    }
+
+    public Map<String, Set<UUID>> getQuestContributors() {
+        return questContributors;
     }
 
     public int getUpgradeLevel(String id) {
