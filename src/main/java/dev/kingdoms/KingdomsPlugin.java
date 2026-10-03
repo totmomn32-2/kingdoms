@@ -15,7 +15,8 @@ public class KingdomsPlugin extends JavaPlugin {
         ProjectMenu projectMenu = new ProjectMenu(kingdomManager);
         KingdomMenu menu = new KingdomMenu(kingdomManager, questMenu, upgradeMenu, projectMenu);
 
-        getCommand("kingdom").setExecutor(new KingdomCommand(kingdomManager, menu, questMenu, upgradeMenu));
+        getCommand("kingdom").setExecutor(
+                new KingdomCommand(kingdomManager, menu, questMenu, upgradeMenu, questManager));
         getServer().getPluginManager().registerEvents(menu, this);
         getServer().getPluginManager().registerEvents(questMenu, this);
         getServer().getPluginManager().registerEvents(upgradeMenu, this);
