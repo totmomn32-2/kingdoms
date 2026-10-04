@@ -1,0 +1,50 @@
+# Edit upgrades here, then run /kingdom admin reload.
+# attribute: max_health, movement_speed, attack_damage, armor, block_break_speed ...
+# Value for a level = base + per-level * level.
+# Note: the menu shows the first 5 upgrades only.
+upgrades:
+  health:
+    name: "Health"
+    icon: GOLDEN_APPLE
+    attribute: max_health
+    base: 20.0
+    per-level: 2.0
+    max-level: 5
+    cost: 50
+    description: "+1 heart per level for every member"
+  speed:
+    name: "Speed"
+    icon: SUGAR
+    attribute: movement_speed
+    base: 0.1
+    per-level: 0.005
+    max-level: 5
+    cost: 60
+    description: "+5% movement speed per level"
+  strength:
+    name: "Strength"
+    icon: BLAZE_POWDER
+    attribute: attack_damage
+    base: 1.0
+    per-level: 0.5
+    max-level: 5
+    cost: 80
+    description: "+0.5 attack damage per level"
+  defense:
+    name: "Defense"
+    icon: IRON_CHESTPLATE
+    attribute: armor
+    base: 0.0
+    per-level: 1.0
+    max-level: 5
+    cost: 70
+    description: "+1 armor point per level"
+  mining:
+    name: "Mining Speed"
+    icon: GOLDEN_PICKAXE
+    attribute: block_break_speed
+    base: 1.0
+    per-level: 0.1
+    max-level: 5
+    cost: 60
+    description: "+10% mining speed per level"
