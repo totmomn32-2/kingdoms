@@ -31,6 +31,10 @@ public class QuestManager {
     }
 
     public void load() {
+        // Shortcut: reload upgrades and projects together with the quests
+        Upgrades.load(plugin);
+        Projects.load(plugin);
+
         File file = new File(plugin.getDataFolder(), "quests.yml");
         if (!file.exists()) {
             plugin.saveResource("quests.yml", false);
