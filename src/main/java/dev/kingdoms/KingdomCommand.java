@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -21,15 +22,18 @@ public class KingdomCommand implements CommandExecutor {
     private final UpgradeMenu upgradeMenu;
     private final QuestManager questManager;
     private final EventManager eventManager;
+    private final ZoneManager zoneManager;
 
     public KingdomCommand(KingdomManager manager, KingdomMenu menu, QuestMenu questMenu,
-                          UpgradeMenu upgradeMenu, QuestManager questManager, EventManager eventManager) {
+                          UpgradeMenu upgradeMenu, QuestManager questManager,
+                          EventManager eventManager, ZoneManager zoneManager) {
         this.manager = manager;
         this.menu = menu;
         this.questMenu = questMenu;
         this.upgradeMenu = upgradeMenu;
         this.questManager = questManager;
         this.eventManager = eventManager;
+        this.zoneManager = zoneManager;
     }
 
     @Override
@@ -157,12 +161,89 @@ public class KingdomCommand implements CommandExecutor {
             return handleEvent(sender, args);
         }
 
+        if (args.length >= 2 && args[1].equalsIgnoreCase("zone")) {
+            return handleZone(sender, args);
+        }
+
         sender.sendMessage(Component.text("Admin commands:"));
         sender.sendMessage(Component.text("/kingdom admin reload"));
         sender.sendMessage(Component.text("/kingdom admin give <red|blue|green> <points|coins|core> <amount>"));
         sender.sendMessage(Component.text("/kingdom admin kick <player>"));
         sender.sendMessage(Component.text("/kingdom admin event <multiplier> <minutes>"));
         sender.sendMessage(Component.text("/kingdom admin event stop"));
+        sender.sendMessage(Component.text("/kingdom admin zone create <id> <radius> <name>"));
+        sender.sendMessage(Component.text("/kingdom admin zone remove <id>"));
+        sender.sendMessage(Component.text("/kingdom admin zone list"));
+        return true;
+    }
+
+    private boolean handleZone(CommandSender sender, String[] args) {
+        if (args.length < 3) {
+            sender.sendMessage(Component.text("Usage: /kingdom admin zone <create|remove|list>"));
+            return true;
+        }
+
+        String sub = args[2].toLowerCase(Locale.ROOT);
+
+        if (sub.equals("list")) {
+            if (zoneManager.getZones().isEmpty()) {
+                sender.sendMessage(Component.text("There are no zones yet."));
+                return true;
+            }
+            sender.sendMessage(Component.text("=== Zones ==="));
+            for (Zone zone : zoneManager.getZones()) {
+                String owner = zone.getOwner() == null ? "nobody" : zone.getOwner().getDisplayName();
+                sender.sendMessage(Component.text(zone.getId() + " - " + zone.getName()
+                        + " (radius " + (int) zone.getRadius() + ", owner: " + owner + ")"));
+            }
+            return true;
+        }
+
+        if (sub.equals("remove")) {
+            if (args.length < 4) {
+                sender.sendMessage(Component.text("Usage: /kingdom admin zone remove <id>"));
+                return true;
+            }
+            if (zoneManager.remove(args[3])) {
+                sender.sendMessage(Component.text("Zone removed."));
+            } else {
+                sender.sendMessage(Component.text("No zone with that id."));
+            }
+            return true;
+        }
+
+        if (sub.equals("create")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("Only players can create zones (it uses your location)."));
+                return true;
+            }
+            if (args.length < 6) {
+                sender.sendMessage(Component.text("Usage: /kingdom admin zone create <id> <radius> <name>"));
+                return true;
+            }
+
+            double radius;
+            try {
+                radius = Double.parseDouble(args[4]);
+            } catch (NumberFormatException e) {
+                sender.sendMessage(Component.text("The radius must be a number."));
+                return true;
+            }
+            if (radius < 3 || radius > 100) {
+                sender.sendMessage(Component.text("The radius must be between 3 and 100."));
+                return true;
+            }
+
+            String name = String.join(" ", Arrays.copyOfRange(args, 5, args.length));
+            if (zoneManager.create(args[3], name, player.getLocation(), radius)) {
+                sender.sendMessage(Component.text("Zone '" + name + "' created here with radius " + (int) radius + "."));
+            } else {
+                sender.sendMessage(Component.text("A zone with that id already exists."));
+            }
+            return true;
+        }
+
+        sender.sendMessage(Component.text("Usage: /kingdom admin zone <create|remove|list>"));
         return true;
     }
 
@@ -252,4 +333,4 @@ public class KingdomCommand implements CommandExecutor {
         }
         return true;
     }
-}
+                                                  }
