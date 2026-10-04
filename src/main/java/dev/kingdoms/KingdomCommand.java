@@ -20,14 +20,16 @@ public class KingdomCommand implements CommandExecutor {
     private final QuestMenu questMenu;
     private final UpgradeMenu upgradeMenu;
     private final QuestManager questManager;
+    private final EventManager eventManager;
 
     public KingdomCommand(KingdomManager manager, KingdomMenu menu, QuestMenu questMenu,
-                          UpgradeMenu upgradeMenu, QuestManager questManager) {
+                          UpgradeMenu upgradeMenu, QuestManager questManager, EventManager eventManager) {
         this.manager = manager;
         this.menu = menu;
         this.questMenu = questMenu;
         this.upgradeMenu = upgradeMenu;
         this.questManager = questManager;
+        this.eventManager = eventManager;
     }
 
     @Override
@@ -77,6 +79,10 @@ public class KingdomCommand implements CommandExecutor {
                 player.sendMessage(Component.text("Core: " + kingdom.getCore()));
                 player.sendMessage(Component.text("Members: " + manager.getMemberCount(kingdom.getType())));
                 player.sendMessage(Component.text("Next level costs: " + kingdom.getLevelUpCost() + " points"));
+                if (eventManager.isActive()) {
+                    player.sendMessage(Component.text("EVENT: rewards x" + eventManager.getMultiplier()
+                            + " (" + eventManager.getMinutesLeft() + " min left)"));
+                }
             }
             return true;
         }
@@ -147,10 +153,46 @@ public class KingdomCommand implements CommandExecutor {
             return handleKick(sender, args);
         }
 
+        if (args.length >= 2 && args[1].equalsIgnoreCase("event")) {
+            return handleEvent(sender, args);
+        }
+
         sender.sendMessage(Component.text("Admin commands:"));
         sender.sendMessage(Component.text("/kingdom admin reload"));
         sender.sendMessage(Component.text("/kingdom admin give <red|blue|green> <points|coins|core> <amount>"));
         sender.sendMessage(Component.text("/kingdom admin kick <player>"));
+        sender.sendMessage(Component.text("/kingdom admin event <multiplier> <minutes>"));
+        sender.sendMessage(Component.text("/kingdom admin event stop"));
+        return true;
+    }
+
+    private boolean handleEvent(CommandSender sender, String[] args) {
+        if (args.length >= 3 && args[2].equalsIgnoreCase("stop")) {
+            eventManager.stop();
+            return true;
+        }
+
+        if (args.length < 4) {
+            sender.sendMessage(Component.text("Usage: /kingdom admin event <multiplier> <minutes>"));
+            return true;
+        }
+
+        double multiplier;
+        int minutes;
+        try {
+            multiplier = Double.parseDouble(args[2]);
+            minutes = Integer.parseInt(args[3]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage(Component.text("Multiplier and minutes must be numbers."));
+            return true;
+        }
+
+        if (multiplier <= 1.0 || multiplier > 10.0 || minutes < 1 || minutes > 1440) {
+            sender.sendMessage(Component.text("Multiplier must be between 1 and 10, minutes between 1 and 1440."));
+            return true;
+        }
+
+        eventManager.start(multiplier, minutes);
         return true;
     }
 
