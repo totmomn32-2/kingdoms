@@ -10,6 +10,7 @@ public class KingdomsPlugin extends JavaPlugin {
     public void onEnable() {
         kingdomManager = new KingdomManager(getDataFolder());
         EventManager eventManager = new EventManager();
+        ZoneManager zoneManager = new ZoneManager(getDataFolder());
         QuestManager questManager = new QuestManager(kingdomManager, this);
         questManager.setEventManager(eventManager);
         QuestMenu questMenu = new QuestMenu(kingdomManager, questManager);
@@ -18,7 +19,7 @@ public class KingdomsPlugin extends JavaPlugin {
         KingdomMenu menu = new KingdomMenu(kingdomManager, questMenu, upgradeMenu, projectMenu);
 
         getCommand("kingdom").setExecutor(new KingdomCommand(
-                kingdomManager, menu, questMenu, upgradeMenu, questManager, eventManager));
+                kingdomManager, menu, questMenu, upgradeMenu, questManager, eventManager, zoneManager));
         getServer().getPluginManager().registerEvents(menu, this);
         getServer().getPluginManager().registerEvents(questMenu, this);
         getServer().getPluginManager().registerEvents(upgradeMenu, this);
