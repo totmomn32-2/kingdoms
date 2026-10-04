@@ -2,13 +2,19 @@ package dev.kingdoms;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+
 public class KingdomsPlugin extends JavaPlugin {
 
     private KingdomManager kingdomManager;
+    private File placedFile;
 
     @Override
     public void onEnable() {
         kingdomManager = new KingdomManager(getDataFolder());
+        placedFile = new File(getDataFolder(), "placed-blocks.txt");
+        PlacedBlocks.load(placedFile);
+
         EventManager eventManager = new EventManager();
         ZoneManager zoneManager = new ZoneManager(getDataFolder());
         QuestManager questManager = new QuestManager(kingdomManager, this);
@@ -36,7 +42,10 @@ public class KingdomsPlugin extends JavaPlugin {
         getServer().getScheduler().runTaskTimer(this, new ZoneTask(kingdomManager, zoneManager), 20L, 20L);
 
         // Auto-save every 5 minutes (6000 ticks)
-        getServer().getScheduler().runTaskTimer(this, () -> kingdomManager.saveKingdoms(), 6000L, 6000L);
+        getServer().getScheduler().runTaskTimer(this, () -> {
+            kingdomManager.saveKingdoms();
+            PlacedBlocks.save(placedFile);
+        }, 6000L, 6000L);
 
         getLogger().info("Kingdoms plugin is ON!");
     }
@@ -44,6 +53,7 @@ public class KingdomsPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         kingdomManager.saveKingdoms();
+        PlacedBlocks.save(placedFile);
         getLogger().info("Kingdoms plugin is OFF!");
     }
 }
