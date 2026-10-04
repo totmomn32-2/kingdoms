@@ -2,6 +2,8 @@ package dev.kingdoms;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,8 +36,11 @@ public class ActivityListener implements Listener {
         Player player = event.getPlayer();
         if (player.getGameMode() != GameMode.SURVIVAL) return;
 
-        String blockName = event.getBlockPlaced().getType().name();
-        quests.addProgress(player, QuestType.PLACE_BLOCK, "ANY", blockName);
+        Block block = event.getBlockPlaced();
+        if (block.getBlockData() instanceof Ageable) return;
+        if (!PlacedBlocks.mark(block)) return;
+
+        quests.addProgress(player, QuestType.PLACE_BLOCK, "ANY", block.getType().name());
     }
 
     @EventHandler
