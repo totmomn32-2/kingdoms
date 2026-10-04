@@ -18,7 +18,7 @@ import java.util.List;
 
 public class UpgradeMenu implements Listener {
 
-    private static final int[] SLOTS = {11, 13, 15};
+    private static final int[] SLOTS = {11, 12, 13, 14, 15};
 
     private static class MenuHolder implements InventoryHolder {
         private Inventory inventory;
@@ -126,4 +126,4 @@ public class UpgradeMenu implements Listener {
         player.sendMessage(Component.text(upgrade.name() + " upgraded to level " + (level + 1) + "!"));
         refresh(event.getInventory(), kingdom);
     }
-                                 }
+}
