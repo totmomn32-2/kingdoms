@@ -1,42 +1,135 @@
 package dev.kingdoms;
 
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class KingdomsPlugin extends JavaPlugin {
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
-    private KingdomManager kingdomManager;
+public class QuestManager {
 
-    @Override
-    public void onEnable() {
-        kingdomManager = new KingdomManager(getDataFolder());
-        EventManager eventManager = new EventManager();
-        QuestManager questManager = new QuestManager(kingdomManager, this);
-        questManager.setEventManager(eventManager);
-        QuestMenu questMenu = new QuestMenu(kingdomManager, questManager);
-        UpgradeMenu upgradeMenu = new UpgradeMenu(kingdomManager);
-        ProjectMenu projectMenu = new ProjectMenu(kingdomManager);
-        KingdomMenu menu = new KingdomMenu(kingdomManager, questMenu, upgradeMenu, projectMenu);
+    private final KingdomManager manager;
+    private final JavaPlugin plugin;
+    private final List<Quest> quests = new ArrayList<>();
+    private EventManager events;
 
-        getCommand("kingdom").setExecutor(new KingdomCommand(
-                kingdomManager, menu, questMenu, upgradeMenu, questManager, eventManager));
-        getServer().getPluginManager().registerEvents(menu, this);
-        getServer().getPluginManager().registerEvents(questMenu, this);
-        getServer().getPluginManager().registerEvents(upgradeMenu, this);
-        getServer().getPluginManager().registerEvents(projectMenu, this);
-        getServer().getPluginManager().registerEvents(new MobKillListener(questManager), this);
-        getServer().getPluginManager().registerEvents(new BlockBreakListener(questManager), this);
-        getServer().getPluginManager().registerEvents(new ActivityListener(questManager, kingdomManager), this);
-        getServer().getPluginManager().registerEvents(new JoinListener(kingdomManager), this);
-
-        // Auto-save every 5 minutes (6000 ticks)
-        getServer().getScheduler().runTaskTimer(this, () -> kingdomManager.saveKingdoms(), 6000L, 6000L);
-
-        getLogger().info("Kingdoms plugin is ON!");
+    public QuestManager(KingdomManager manager, JavaPlugin plugin) {
+        this.manager = manager;
+        this.plugin = plugin;
+        load();
     }
 
-    @Override
-    public void onDisable() {
-        kingdomManager.saveKingdoms();
-        getLogger().info("Kingdoms plugin is OFF!");
+    public void setEventManager(EventManager events) {
+        this.events = events;
+    }
+
+    public void load() {
+        File file = new File(plugin.getDataFolder(), "quests.yml");
+        if (!file.exists()) {
+            plugin.saveResource("quests.yml", false);
+        }
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+        ConfigurationSection section = yaml.getConfigurationSection("quests");
+        quests.clear();
+        if (section == null) {
+            plugin.getLogger().warning("quests.yml has no 'quests:' section.");
+            return;
+        }
+
+        for (String id : section.getKeys(false)) {
+            ConfigurationSection q = section.getConfigurationSection(id);
+            if (q == null) continue;
+
+            QuestType type;
+            try {
+                type = QuestType.valueOf(q.getString("type", "").toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().warning("Quest '" + id + "' has an invalid type, skipping it.");
+                continue;
+            }
+
+            quests.add(new Quest(
+                    id,
+                    q.getString("name", id),
+                    type,
+                    q.getString("target", "ANY").toUpperCase(Locale.ROOT),
+                    Math.max(1, q.getLong("amount", 1)),
+                    Math.max(1, q.getInt("min-contributors", 1)),
+                    q.getLong("points"),
+                    q.getLong("coins"),
+                    q.getLong("core")
+            ));
+        }
+        plugin.getLogger().info("Loaded " + quests.size() + " quests.");
+    }
+
+    public List<Quest> getQuests() {
+        return quests;
+    }
+
+    public void addProgress(Player player, QuestType type, String... keys) {
+        Kingdom kingdom = manager.getKingdomData(player.getUniqueId());
+        if (kingdom == null) return;
+
+        for (Quest quest : quests) {
+            if (quest.type() != type) continue;
+            if (!Arrays.asList(keys).contains(quest.target())) continue;
+
+            long progress = Math.min(kingdom.getProgress(quest.id()) + 1, quest.amount());
+            kingdom.addContributor(quest.id(), player.getUniqueId());
+            int contributors = kingdom.getContributorCount(quest.id());
+
+            if (progress >= quest.amount() && contributors >= quest.minContributors()) {
+                // Project bonuses: +10% per level
+                long points = quest.points() + quest.points() * kingdom.getProjectLevel("academy") * 10 / 100;
+                long coins = quest.coins() + quest.coins() * kingdom.getProjectLevel("market") * 10 / 100;
+
+                // Event multiplier (core is never multiplied)
+                double multiplier = (events == null) ? 1.0 : events.getMultiplier();
+                points = Math.round(points * multiplier);
+                coins = Math.round(coins * multiplier);
+
+                kingdom.setProgress(quest.id(), 0);
+                kingdom.clearContributors(quest.id());
+                kingdom.addPoints(points);
+                kingdom.addCoins(coins);
+                kingdom.addCore(quest.core());
+                manager.saveKingdoms();
+
+                String reward = "+" + points + " Points, +" + coins + " Coins";
+                if (quest.core() > 0) {
+                    reward += ", +" + quest.core() + " Core";
+                }
+                if (multiplier > 1.0) {
+                    reward += " (event x" + multiplier + ")";
+                }
+
+                for (Player online : Bukkit.getOnlinePlayers()) {
+                    if (manager.getKingdom(online.getUniqueId()) == kingdom.getType()) {
+                        online.sendMessage(Component.text("Quest complete: " + quest.name() + "! " + reward));
+                    }
+                }
+            } else {
+                kingdom.setProgress(quest.id(), progress);
+                if (progress >= quest.amount()) {
+                    int missing = quest.minContributors() - contributors;
+                    player.sendActionBar(Component.text(quest.name() + ": waiting for " + missing
+                            + " more member(s) to contribute"));
+                } else if (quest.minContributors() > 1) {
+                    player.sendActionBar(Component.text(quest.name() + ": " + progress + "/" + quest.amount()
+                            + " (members " + contributors + "/" + quest.minContributors() + ")"));
+                } else {
+                    player.sendActionBar(Component.text(quest.name() + ": " + progress + "/" + quest.amount()));
+                }
+            }
+        }
     }
 }
