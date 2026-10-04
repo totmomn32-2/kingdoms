@@ -1,0 +1,37 @@
+# Edit projects here, then run /kingdom admin reload.
+# Cost of the next level = base value * (current level + 1).
+# Keep the ids "market" (+10% coins) and "academy" (+10% points): the code uses them.
+# Note: the menu shows the first 4 projects only.
+projects:
+  castle:
+    name: "Castle"
+    icon: STONE_BRICKS
+    max-level: 3
+    points: 200
+    coins: 300
+    core: 1
+    description: "The heart of the kingdom"
+  market:
+    name: "Market"
+    icon: EMERALD
+    max-level: 3
+    points: 100
+    coins: 200
+    core: 0
+    description: "Where the kingdom trades"
+  academy:
+    name: "Academy"
+    icon: ENCHANTING_TABLE
+    max-level: 3
+    points: 150
+    coins: 250
+    core: 1
+    description: "Where members learn new skills"
+  storage:
+    name: "Storage"
+    icon: CHEST
+    max-level: 3
+    points: 100
+    coins: 150
+    core: 0
+    description: "Shared kingdom storage"
