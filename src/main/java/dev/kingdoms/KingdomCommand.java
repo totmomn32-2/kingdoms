@@ -23,10 +23,11 @@ public class KingdomCommand implements CommandExecutor {
     private final QuestManager questManager;
     private final EventManager eventManager;
     private final ZoneManager zoneManager;
+    private final ZoneMenu zoneMenu;
 
     public KingdomCommand(KingdomManager manager, KingdomMenu menu, QuestMenu questMenu,
                           UpgradeMenu upgradeMenu, QuestManager questManager,
-                          EventManager eventManager, ZoneManager zoneManager) {
+                          EventManager eventManager, ZoneManager zoneManager, ZoneMenu zoneMenu) {
         this.manager = manager;
         this.menu = menu;
         this.questMenu = questMenu;
@@ -34,6 +35,7 @@ public class KingdomCommand implements CommandExecutor {
         this.questManager = questManager;
         this.eventManager = eventManager;
         this.zoneManager = zoneManager;
+        this.zoneMenu = zoneMenu;
     }
 
     @Override
@@ -98,6 +100,11 @@ public class KingdomCommand implements CommandExecutor {
 
         if (args[0].equalsIgnoreCase("upgrades") || args[0].equalsIgnoreCase("upgrade")) {
             upgradeMenu.open(player);
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("map")) {
+            zoneMenu.open(player);
             return true;
         }
 
@@ -333,4 +340,4 @@ public class KingdomCommand implements CommandExecutor {
         }
         return true;
     }
-                                                  }
+        }
