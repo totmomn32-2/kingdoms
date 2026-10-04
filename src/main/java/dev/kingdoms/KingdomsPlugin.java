@@ -16,14 +16,17 @@ public class KingdomsPlugin extends JavaPlugin {
         QuestMenu questMenu = new QuestMenu(kingdomManager, questManager);
         UpgradeMenu upgradeMenu = new UpgradeMenu(kingdomManager);
         ProjectMenu projectMenu = new ProjectMenu(kingdomManager);
+        ZoneMenu zoneMenu = new ZoneMenu(zoneManager);
         KingdomMenu menu = new KingdomMenu(kingdomManager, questMenu, upgradeMenu, projectMenu);
 
         getCommand("kingdom").setExecutor(new KingdomCommand(
-                kingdomManager, menu, questMenu, upgradeMenu, questManager, eventManager, zoneManager));
+                kingdomManager, menu, questMenu, upgradeMenu, questManager,
+                eventManager, zoneManager, zoneMenu));
         getServer().getPluginManager().registerEvents(menu, this);
         getServer().getPluginManager().registerEvents(questMenu, this);
         getServer().getPluginManager().registerEvents(upgradeMenu, this);
         getServer().getPluginManager().registerEvents(projectMenu, this);
+        getServer().getPluginManager().registerEvents(zoneMenu, this);
         getServer().getPluginManager().registerEvents(new MobKillListener(questManager), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(questManager), this);
         getServer().getPluginManager().registerEvents(new ActivityListener(questManager, kingdomManager), this);
