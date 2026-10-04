@@ -29,6 +29,9 @@ public class KingdomsPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ActivityListener(questManager, kingdomManager), this);
         getServer().getPluginManager().registerEvents(new JoinListener(kingdomManager), this);
 
+        // Zone capture: runs every second (20 ticks)
+        getServer().getScheduler().runTaskTimer(this, new ZoneTask(kingdomManager, zoneManager), 20L, 20L);
+
         // Auto-save every 5 minutes (6000 ticks)
         getServer().getScheduler().runTaskTimer(this, () -> kingdomManager.saveKingdoms(), 6000L, 6000L);
 
