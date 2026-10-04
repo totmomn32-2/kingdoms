@@ -31,6 +31,8 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
+        if (PlacedBlocks.contains(block)) return;
+
         quests.addProgress(player, QuestType.MINE_BLOCK, blockName);
     }
 }
