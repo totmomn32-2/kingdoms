@@ -18,11 +18,16 @@ public class QuestManager {
     private final KingdomManager manager;
     private final JavaPlugin plugin;
     private final List<Quest> quests = new ArrayList<>();
+    private EventManager events;
 
     public QuestManager(KingdomManager manager, JavaPlugin plugin) {
         this.manager = manager;
         this.plugin = plugin;
         load();
+    }
+
+    public void setEventManager(EventManager events) {
+        this.events = events;
     }
 
     public void load() {
@@ -87,6 +92,11 @@ public class QuestManager {
                 long points = quest.points() + quest.points() * kingdom.getProjectLevel("academy") * 10 / 100;
                 long coins = quest.coins() + quest.coins() * kingdom.getProjectLevel("market") * 10 / 100;
 
+                // Event multiplier (core is never multiplied)
+                double multiplier = (events == null) ? 1.0 : events.getMultiplier();
+                points = Math.round(points * multiplier);
+                coins = Math.round(coins * multiplier);
+
                 kingdom.setProgress(quest.id(), 0);
                 kingdom.clearContributors(quest.id());
                 kingdom.addPoints(points);
@@ -97,6 +107,9 @@ public class QuestManager {
                 String reward = "+" + points + " Points, +" + coins + " Coins";
                 if (quest.core() > 0) {
                     reward += ", +" + quest.core() + " Core";
+                }
+                if (multiplier > 1.0) {
+                    reward += " (event x" + multiplier + ")";
                 }
 
                 for (Player online : Bukkit.getOnlinePlayers()) {
